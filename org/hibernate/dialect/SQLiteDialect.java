@@ -55,37 +55,30 @@ public class SQLiteDialect extends Dialect {
     registerFunction( "substr", new StandardSQLFunction("substr", Hibernate.STRING) );
     registerFunction( "substring", new SQLFunctionTemplate( Hibernate.STRING, "substr(?1, ?2, ?3)" ) );
     registerFunction( "trim", new AbstractAnsiTrimEmulationFunction() {
-        @Override
         protected SQLFunction resolveBothSpaceTrimFunction() {
           return new SQLFunctionTemplate(Hibernate.STRING, "trim(?1)");
         }
 
-        @Override
         protected SQLFunction resolveBothSpaceTrimFromFunction() {
           return new SQLFunctionTemplate(Hibernate.STRING, "trim(?2)");
         }
 
-        @Override
         protected SQLFunction resolveLeadingSpaceTrimFunction() {
           return new SQLFunctionTemplate(Hibernate.STRING, "ltrim(?1)");
         }
 
-        @Override
         protected SQLFunction resolveTrailingSpaceTrimFunction() {
           return new SQLFunctionTemplate(Hibernate.STRING, "rtrim(?1)");
         }
 
-        @Override
         protected SQLFunction resolveBothTrimFunction() {
           return new SQLFunctionTemplate(Hibernate.STRING, "trim(?1, ?2)");
         }
 
-        @Override
         protected SQLFunction resolveLeadingTrimFunction() {
           return new SQLFunctionTemplate(Hibernate.STRING, "ltrim(?1, ?2)");
         }
 
-        @Override
         protected SQLFunction resolveTrailingTrimFunction() {
           return new SQLFunctionTemplate(Hibernate.STRING, "rtrim(?1, ?2)");
         }
