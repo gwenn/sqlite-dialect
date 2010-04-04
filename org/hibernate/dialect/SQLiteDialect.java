@@ -11,10 +11,13 @@ package org.hibernate.dialect;
 
 import java.sql.Types;
 
-import org.hibernate.dialect.function.StandardSQLFunction;
-import org.hibernate.dialect.function.SQLFunctionTemplate;
-import org.hibernate.dialect.function.VarArgsSQLFunction;
 import org.hibernate.Hibernate;
+import org.hibernate.dialect.function.AbstractAnsiTrimEmulationFunction;
+import org.hibernate.dialect.function.NoArgSQLFunction;
+import org.hibernate.dialect.function.SQLFunction;
+import org.hibernate.dialect.function.SQLFunctionTemplate;
+import org.hibernate.dialect.function.StandardSQLFunction;
+import org.hibernate.dialect.function.VarArgsSQLFunction;
 
 public class SQLiteDialect extends Dialect {
   public SQLiteDialect() {
@@ -26,10 +29,10 @@ public class SQLiteDialect extends Dialect {
     registerColumnType(Types.FLOAT, "float");
     registerColumnType(Types.REAL, "real");
     registerColumnType(Types.DOUBLE, "double");
-    registerColumnType(Types.NUMERIC, "numeric");
+    registerColumnType(Types.NUMERIC, "numeric($p, $s)");
     registerColumnType(Types.DECIMAL, "decimal");
     registerColumnType(Types.CHAR, "char");
-    registerColumnType(Types.VARCHAR, "varchar");
+    registerColumnType(Types.VARCHAR, "varchar($l)");
     registerColumnType(Types.LONGVARCHAR, "longvarchar");
     registerColumnType(Types.DATE, "date");
     registerColumnType(Types.TIME, "time");
@@ -37,15 +40,57 @@ public class SQLiteDialect extends Dialect {
     registerColumnType(Types.BINARY, "blob");
     registerColumnType(Types.VARBINARY, "blob");
     registerColumnType(Types.LONGVARBINARY, "blob");
-    // registerColumnType(Types.NULL, "null");
     registerColumnType(Types.BLOB, "blob");
     registerColumnType(Types.CLOB, "clob");
     registerColumnType(Types.BOOLEAN, "boolean");
 
+    //registerFunction( "abs", new StandardSQLFunction("abs") );
     registerFunction( "concat", new VarArgsSQLFunction(Hibernate.STRING, "", "||", "") );
+    //registerFunction( "length", new StandardSQLFunction("length", Hibernate.LONG) );
+    //registerFunction( "lower", new StandardSQLFunction("lower") );
     registerFunction( "mod", new SQLFunctionTemplate( Hibernate.INTEGER, "?1 % ?2" ) );
+    registerFunction( "quote", new StandardSQLFunction("quote", Hibernate.STRING) );
+    registerFunction( "random", new NoArgSQLFunction("random", Hibernate.INTEGER) );
+    registerFunction( "round", new StandardSQLFunction("round") );
     registerFunction( "substr", new StandardSQLFunction("substr", Hibernate.STRING) );
-    registerFunction( "substring", new StandardSQLFunction( "substr", Hibernate.STRING ) );
+    registerFunction( "substring", new SQLFunctionTemplate( Hibernate.STRING, "substr(?1, ?2, ?3)" ) );
+    registerFunction( "trim", new AbstractAnsiTrimEmulationFunction() {
+        @Override
+        protected SQLFunction resolveBothSpaceTrimFunction() {
+          return new SQLFunctionTemplate(Hibernate.STRING, "trim(?1)");
+        }
+
+        @Override
+        protected SQLFunction resolveBothSpaceTrimFromFunction() {
+          return new SQLFunctionTemplate(Hibernate.STRING, "trim(?2)");
+        }
+
+        @Override
+        protected SQLFunction resolveLeadingSpaceTrimFunction() {
+          return new SQLFunctionTemplate(Hibernate.STRING, "ltrim(?1)");
+        }
+
+        @Override
+        protected SQLFunction resolveTrailingSpaceTrimFunction() {
+          return new SQLFunctionTemplate(Hibernate.STRING, "rtrim(?1)");
+        }
+
+        @Override
+        protected SQLFunction resolveBothTrimFunction() {
+          return new SQLFunctionTemplate(Hibernate.STRING, "trim(?1, ?2)");
+        }
+
+        @Override
+        protected SQLFunction resolveLeadingTrimFunction() {
+          return new SQLFunctionTemplate(Hibernate.STRING, "ltrim(?1, ?2)");
+        }
+
+        @Override
+        protected SQLFunction resolveTrailingTrimFunction() {
+          return new SQLFunctionTemplate(Hibernate.STRING, "rtrim(?1, ?2)");
+        }
+    } );
+    //registerFunction( "upper", new StandardSQLFunction("upper") );
   }
 
   public boolean supportsIdentityColumns() {
@@ -84,6 +129,10 @@ public class SQLiteDialect extends Dialect {
     return true;
   }
 
+  public boolean bindLimitParametersInReverseOrder() {
+    return true;
+  }
+
   protected String getLimitString(String query, boolean hasOffset) {
     return new StringBuffer(query.length()+20).
       append(query).
@@ -100,7 +149,7 @@ public class SQLiteDialect extends Dialect {
   }
 
   public boolean dropTemporaryTableAfterUse() {
-    return false;
+    return false; // TODO Validate
   }
 
   public boolean supportsCurrentTimestampSelection() {
