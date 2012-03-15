@@ -1,7 +1,7 @@
 /*
  * The author disclaims copyright to this source code.  In place of
  * a legal notice, here is a blessing:
- * 
+ *
  *    May you do good and not evil.
  *    May you find forgiveness for yourself and forgive others.
  *    May you share freely, never taking more than you give.
@@ -11,17 +11,17 @@ package org.hibernate.dialect;
 
 import java.sql.Types;
 
-import org.hibernate.Hibernate;
 import org.hibernate.dialect.function.AbstractAnsiTrimEmulationFunction;
 import org.hibernate.dialect.function.NoArgSQLFunction;
 import org.hibernate.dialect.function.SQLFunction;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.dialect.function.StandardSQLFunction;
 import org.hibernate.dialect.function.VarArgsSQLFunction;
+import org.hibernate.type.StandardBasicTypes;
 
 public class SQLiteDialect extends Dialect {
   public SQLiteDialect() {
-    registerColumnType(Types.BIT, "bit");
+    registerColumnType(Types.BIT, "boolean");
     registerColumnType(Types.TINYINT, "tinyint");
     registerColumnType(Types.SMALLINT, "smallint");
     registerColumnType(Types.INTEGER, "integer");
@@ -36,7 +36,7 @@ public class SQLiteDialect extends Dialect {
     registerColumnType(Types.LONGVARCHAR, "longvarchar");
     registerColumnType(Types.DATE, "date");
     registerColumnType(Types.TIME, "time");
-    registerColumnType(Types.TIMESTAMP, "timestamp");
+    registerColumnType(Types.TIMESTAMP, "datetime");
     registerColumnType(Types.BINARY, "blob");
     registerColumnType(Types.VARBINARY, "blob");
     registerColumnType(Types.LONGVARBINARY, "blob");
@@ -45,42 +45,42 @@ public class SQLiteDialect extends Dialect {
     registerColumnType(Types.BOOLEAN, "boolean");
 
     //registerFunction( "abs", new StandardSQLFunction("abs") );
-    registerFunction( "concat", new VarArgsSQLFunction(Hibernate.STRING, "", "||", "") );
-    //registerFunction( "length", new StandardSQLFunction("length", Hibernate.LONG) );
+    registerFunction( "concat", new VarArgsSQLFunction(StandardBasicTypes.STRING, "", "||", "") );
+    //registerFunction( "length", new StandardSQLFunction("length", StandardBasicTypes.LONG) );
     //registerFunction( "lower", new StandardSQLFunction("lower") );
-    registerFunction( "mod", new SQLFunctionTemplate( Hibernate.INTEGER, "?1 % ?2" ) );
-    registerFunction( "quote", new StandardSQLFunction("quote", Hibernate.STRING) );
-    registerFunction( "random", new NoArgSQLFunction("random", Hibernate.INTEGER) );
+    registerFunction( "mod", new SQLFunctionTemplate(StandardBasicTypes.INTEGER, "?1 % ?2" ) );
+    registerFunction( "quote", new StandardSQLFunction("quote", StandardBasicTypes.STRING) );
+    registerFunction( "random", new NoArgSQLFunction("random", StandardBasicTypes.INTEGER) );
     registerFunction( "round", new StandardSQLFunction("round") );
-    registerFunction( "substr", new StandardSQLFunction("substr", Hibernate.STRING) );
-    registerFunction( "substring", new SQLFunctionTemplate( Hibernate.STRING, "substr(?1, ?2, ?3)" ) );
+    registerFunction( "substr", new StandardSQLFunction("substr", StandardBasicTypes.STRING) );
+    registerFunction( "substring", new SQLFunctionTemplate( StandardBasicTypes.STRING, "substr(?1, ?2, ?3)" ) );
     registerFunction( "trim", new AbstractAnsiTrimEmulationFunction() {
         protected SQLFunction resolveBothSpaceTrimFunction() {
-          return new SQLFunctionTemplate(Hibernate.STRING, "trim(?1)");
+          return new SQLFunctionTemplate(StandardBasicTypes.STRING, "trim(?1)");
         }
 
         protected SQLFunction resolveBothSpaceTrimFromFunction() {
-          return new SQLFunctionTemplate(Hibernate.STRING, "trim(?2)");
+          return new SQLFunctionTemplate(StandardBasicTypes.STRING, "trim(?2)");
         }
 
         protected SQLFunction resolveLeadingSpaceTrimFunction() {
-          return new SQLFunctionTemplate(Hibernate.STRING, "ltrim(?1)");
+          return new SQLFunctionTemplate(StandardBasicTypes.STRING, "ltrim(?1)");
         }
 
         protected SQLFunction resolveTrailingSpaceTrimFunction() {
-          return new SQLFunctionTemplate(Hibernate.STRING, "rtrim(?1)");
+          return new SQLFunctionTemplate(StandardBasicTypes.STRING, "rtrim(?1)");
         }
 
         protected SQLFunction resolveBothTrimFunction() {
-          return new SQLFunctionTemplate(Hibernate.STRING, "trim(?1, ?2)");
+          return new SQLFunctionTemplate(StandardBasicTypes.STRING, "trim(?1, ?2)");
         }
 
         protected SQLFunction resolveLeadingTrimFunction() {
-          return new SQLFunctionTemplate(Hibernate.STRING, "ltrim(?1, ?2)");
+          return new SQLFunctionTemplate(StandardBasicTypes.STRING, "ltrim(?1, ?2)");
         }
 
         protected SQLFunction resolveTrailingTrimFunction() {
-          return new SQLFunctionTemplate(Hibernate.STRING, "rtrim(?1, ?2)");
+          return new SQLFunctionTemplate(StandardBasicTypes.STRING, "rtrim(?1, ?2)");
         }
     } );
     //registerFunction( "upper", new StandardSQLFunction("upper") );
@@ -142,7 +142,7 @@ public class SQLiteDialect extends Dialect {
   }
 
   public boolean dropTemporaryTableAfterUse() {
-    return false; // TODO Validate
+    return true; // TODO Validate
   }
 
   public boolean supportsCurrentTimestampSelection() {
@@ -169,9 +169,11 @@ public class SQLiteDialect extends Dialect {
     return false;
   }
 
+  /*
   public String getAddColumnString() {
     return "add column";
   }
+  */
 
   public String getForUpdateString() {
     return "";
@@ -200,6 +202,20 @@ public class SQLiteDialect extends Dialect {
   }
 
   public boolean supportsCascadeDelete() {
+    return true;
+  }
+
+  /* not case insensitive for unicode characters by default (ICU extension needed)
+  public boolean supportsCaseInsensitiveLike() {
+    return true;
+  }
+  */
+
+  public boolean supportsTupleDistinctCounts() {
     return false;
+  }
+
+  public String getSelectGUIDString() {
+    return "select hex(randomblob(16))";
   }
 }
