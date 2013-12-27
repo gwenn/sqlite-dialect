@@ -9,14 +9,17 @@
  */
 package org.hibernate.dialect;
 
+import java.sql.SQLException;
 import java.sql.Types;
 
+import org.hibernate.JDBCException;
 import org.hibernate.dialect.function.AbstractAnsiTrimEmulationFunction;
 import org.hibernate.dialect.function.NoArgSQLFunction;
 import org.hibernate.dialect.function.SQLFunction;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.dialect.function.StandardSQLFunction;
 import org.hibernate.dialect.function.VarArgsSQLFunction;
+import org.hibernate.exception.*;
 import org.hibernate.type.StandardBasicTypes;
 
 public class SQLiteDialect extends Dialect {
@@ -44,16 +47,12 @@ public class SQLiteDialect extends Dialect {
     registerColumnType(Types.CLOB, "clob");
     registerColumnType(Types.BOOLEAN, "boolean");
 
-    //registerFunction( "abs", new StandardSQLFunction("abs") );
     registerFunction( "concat", new VarArgsSQLFunction(StandardBasicTypes.STRING, "", "||", "") );
-    //registerFunction( "length", new StandardSQLFunction("length", StandardBasicTypes.LONG) );
-    //registerFunction( "lower", new StandardSQLFunction("lower") );
     registerFunction( "mod", new SQLFunctionTemplate(StandardBasicTypes.INTEGER, "?1 % ?2" ) );
     registerFunction( "quote", new StandardSQLFunction("quote", StandardBasicTypes.STRING) );
     registerFunction( "random", new NoArgSQLFunction("random", StandardBasicTypes.INTEGER) );
     registerFunction( "round", new StandardSQLFunction("round") );
     registerFunction( "substr", new StandardSQLFunction("substr", StandardBasicTypes.STRING) );
-    registerFunction( "substring", new SQLFunctionTemplate( StandardBasicTypes.STRING, "substr(?1, ?2, ?3)" ) );
     registerFunction( "trim", new AbstractAnsiTrimEmulationFunction() {
         protected SQLFunction resolveBothSpaceTrimFunction() {
           return new SQLFunctionTemplate(StandardBasicTypes.STRING, "trim(?1)");
@@ -83,88 +82,146 @@ public class SQLiteDialect extends Dialect {
           return new SQLFunctionTemplate(StandardBasicTypes.STRING, "rtrim(?1, ?2)");
         }
     } );
-    //registerFunction( "upper", new StandardSQLFunction("upper") );
   }
 
+  @Override
   public boolean supportsIdentityColumns() {
     return true;
   }
 
   /*
   public boolean supportsInsertSelectIdentity() {
-    return true; // As specify in NHibernate dialect
+    return true; // As specified in NHibernate dialect
   }
   */
 
+  @Override
   public boolean hasDataTypeInIdentityColumn() {
-    return false; // As specify in NHibernate dialect
+    return false; // As specified in NHibernate dialect
   }
 
   /*
   public String appendIdentitySelectToInsert(String insertString) {
-    return new StringBuffer(insertString.length()+30). // As specify in NHibernate dialect
+    return new StringBuffer(insertString.length()+30). // As specified in NHibernate dialect
       append(insertString).
       append("; ").append(getIdentitySelectString()).
       toString();
   }
   */
 
+  @Override
   public String getIdentityColumnString() {
     // return "integer primary key autoincrement";
     return "integer";
   }
 
+  @Override
   public String getIdentitySelectString() {
     return "select last_insert_rowid()";
   }
 
+  @Override
   public boolean supportsLimit() {
     return true;
   }
 
+  @Override
   public boolean bindLimitParametersInReverseOrder() {
     return true;
   }
 
+  @Override
   protected String getLimitString(String query, boolean hasOffset) {
-    return new StringBuffer(query.length()+20).
-      append(query).
-      append(hasOffset ? " limit ? offset ?" : " limit ?").
-      toString();
+    return query + (hasOffset ? " limit ? offset ?" : " limit ?");
   }
 
+  @Override
   public boolean supportsTemporaryTables() {
     return true;
   }
 
+  @Override
   public String getCreateTemporaryTableString() {
     return "create temporary table if not exists";
   }
 
-  public boolean dropTemporaryTableAfterUse() {
-    return true; // TODO Validate
+  @Override
+  public Boolean performTemporaryTableDDLInIsolation() {
+    return Boolean.FALSE;
   }
 
+  /*
+  @Override
+  public boolean dropTemporaryTableAfterUse() {
+    return true; // temporary tables are only dropped when the connection is closed. If the connection is pooled...
+  }
+  */
+
+  @Override
   public boolean supportsCurrentTimestampSelection() {
     return true;
   }
 
+  @Override
   public boolean isCurrentTimestampSelectStringCallable() {
     return false;
   }
 
+  @Override
   public String getCurrentTimestampSelectString() {
     return "select current_timestamp";
   }
 
+  private static final int SQLITE_BUSY = 5;
+  private static final int SQLITE_LOCKED = 6;
+  private static final int SQLITE_IOERR = 10;
+  private static final int SQLITE_CORRUPT = 11;
+  private static final int SQLITE_NOTFOUND = 12;
+  private static final int SQLITE_FULL = 13;
+  private static final int SQLITE_CANTOPEN = 14;
+  private static final int SQLITE_PROTOCOL = 15;
+  private static final int SQLITE_TOOBIG = 18;
+  private static final int SQLITE_CONSTRAINT = 19;
+  private static final int SQLITE_MISMATCH = 20;
+  private static final int SQLITE_NOTADB = 26;
+  @Override
+  public SQLExceptionConverter buildSQLExceptionConverter() {
+    return new SQLExceptionConverter() {
+      @Override
+      public JDBCException convert(SQLException sqlException, String message, String sql) {
+        final int errorCode = JDBCExceptionHelper.extractErrorCode(sqlException);
+        if (errorCode == SQLITE_CONSTRAINT) {
+          final String constraintName = EXTRACTER.extractConstraintName(sqlException);
+          return new ConstraintViolationException(message, sqlException, sql, constraintName);
+        } else if (errorCode == SQLITE_TOOBIG || errorCode == SQLITE_MISMATCH) {
+          return new DataException(message, sqlException, sql);
+        } else if (errorCode == SQLITE_BUSY || errorCode == SQLITE_LOCKED) {
+          return new LockAcquisitionException(message, sqlException, sql);
+        } else if ((errorCode >= SQLITE_IOERR && errorCode <= SQLITE_PROTOCOL) || errorCode == SQLITE_NOTADB) {
+          return new JDBCConnectionException(message, sqlException, sql);
+        }
+        return new GenericJDBCException(message, sqlException, sql);
+      }
+    };
+  }
+
+  public static final ViolatedConstraintNameExtracter EXTRACTER = new TemplatedViolatedConstraintNameExtracter() {
+    public String extractConstraintName(SQLException sqle) {
+      return extractUsingTemplate( "constraint ", " failed", sqle.getMessage() );
+    }
+  };
+
+  @Override
   public boolean supportsUnionAll() {
     return true;
   }
 
+  @Override
   public boolean hasAlterTable() {
-    return false; // As specify in NHibernate dialect
+    return false; // As specified in NHibernate dialect
   }
 
+  @Override
   public boolean dropConstraints() {
     return false;
   }
@@ -175,35 +232,43 @@ public class SQLiteDialect extends Dialect {
   }
   */
 
+  @Override
   public String getForUpdateString() {
     return "";
   }
 
+  @Override
   public boolean supportsOuterJoinForUpdate() {
     return false;
   }
 
+  @Override
   public String getDropForeignKeyString() {
     throw new UnsupportedOperationException("No drop foreign key syntax supported by SQLiteDialect");
   }
 
+  @Override
   public String getAddForeignKeyConstraintString(String constraintName,
       String[] foreignKey, String referencedTable, String[] primaryKey,
       boolean referencesPrimaryKey) {
     throw new UnsupportedOperationException("No add foreign key syntax supported by SQLiteDialect");
   }
 
+  @Override
   public String getAddPrimaryKeyConstraintString(String constraintName) {
     throw new UnsupportedOperationException("No add primary key syntax supported by SQLiteDialect");
   }
 
+  @Override
   public boolean supportsIfExistsBeforeTableName() {
     return true;
   }
 
+  /*
   public boolean supportsCascadeDelete() {
     return true;
   }
+  */
 
   /* not case insensitive for unicode characters by default (ICU extension needed)
   public boolean supportsCaseInsensitiveLike() {
@@ -211,10 +276,12 @@ public class SQLiteDialect extends Dialect {
   }
   */
 
+  @Override
   public boolean supportsTupleDistinctCounts() {
     return false;
   }
 
+  @Override
   public String getSelectGUIDString() {
     return "select hex(randomblob(16))";
   }

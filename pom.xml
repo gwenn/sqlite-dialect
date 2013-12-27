@@ -7,6 +7,28 @@
   <packaging>jar</packaging>
   <version>0.1.0</version>
   <name>SQLite dialect for Hibernate</name>
+  <description>SQLite dialect for Hibernate</description>
+  <url>https://github.com/gwenn/sqlite-dialect</url>
+
+  <licenses>
+    <license>
+      <name>Public domain</name>
+      <url>http://unlicense.org/</url>
+      <distribution>manual</distribution>
+    </license>
+  </licenses>
+
+  <issueManagement>
+    <system>github</system>
+    <url>https://github.com/gwenn/sqlite-dialect/issues</url>
+  </issueManagement>
+
+  <scm>
+    <connection>scm:git:https://github.com/gwenn/sqlite-dialect.git</connection>
+    <developerConnection>scm:git:git@github.com:gwenn/sqlite-dialect.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://github.com/gwenn/sqlite-dialect</url>
+  </scm>
 
   <properties>
     <java.version>1.6</java.version>
