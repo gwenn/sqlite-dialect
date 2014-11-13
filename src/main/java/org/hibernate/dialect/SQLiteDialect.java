@@ -19,7 +19,14 @@ import org.hibernate.dialect.function.SQLFunction;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.dialect.function.StandardSQLFunction;
 import org.hibernate.dialect.function.VarArgsSQLFunction;
+import org.hibernate.dialect.pagination.AbstractLimitHandler;
+import org.hibernate.dialect.pagination.LimitHandler;
+import org.hibernate.engine.spi.RowSelection;
 import org.hibernate.exception.*;
+import org.hibernate.internal.util.JdbcExceptionHelper;
+import org.hibernate.exception.spi.SQLExceptionConversionDelegate;
+import org.hibernate.exception.spi.TemplatedViolatedConstraintNameExtracter;
+import org.hibernate.exception.spi.ViolatedConstraintNameExtracter;
 import org.hibernate.type.StandardBasicTypes;
 
 public class SQLiteDialect extends Dialect {
@@ -121,13 +128,23 @@ public class SQLiteDialect extends Dialect {
   }
 
   @Override
-  public boolean supportsLimit() {
-    return true;
-  }
+  public LimitHandler buildLimitHandler(String sql, RowSelection selection) {
+    return new AbstractLimitHandler(sql, selection) {
+      @Override
+      public String getProcessedSql() {
+        return sql + (super.supportsLimitOffset() ? " limit ? offset ?" : " limit ?");
+      }
 
-  @Override
-  public boolean bindLimitParametersInReverseOrder() {
-    return true;
+      @Override
+      public boolean supportsLimit() {
+        return true;
+      }
+
+      @Override
+      public boolean bindLimitParametersInReverseOrder() {
+        return true;
+      }
+    };
   }
 
   @Override
@@ -184,12 +201,13 @@ public class SQLiteDialect extends Dialect {
   private static final int SQLITE_CONSTRAINT = 19;
   private static final int SQLITE_MISMATCH = 20;
   private static final int SQLITE_NOTADB = 26;
+
   @Override
-  public SQLExceptionConverter buildSQLExceptionConverter() {
-    return new SQLExceptionConverter() {
+  public SQLExceptionConversionDelegate buildSQLExceptionConversionDelegate() {
+    return new SQLExceptionConversionDelegate() {
       @Override
       public JDBCException convert(SQLException sqlException, String message, String sql) {
-        final int errorCode = JDBCExceptionHelper.extractErrorCode(sqlException);
+        final int errorCode = JdbcExceptionHelper.extractErrorCode(sqlException);
         if (errorCode == SQLITE_CONSTRAINT) {
           final String constraintName = EXTRACTER.extractConstraintName(sqlException);
           return new ConstraintViolationException(message, sqlException, sql, constraintName);
