@@ -132,12 +132,32 @@ public class SQLiteDialect extends Dialect {
     return new AbstractLimitHandler(sql, selection) {
       @Override
       public String getProcessedSql() {
-        return sql + (super.supportsLimitOffset() ? " limit ? offset ?" : " limit ?");
+        String processed = sql;
+
+        if (selection.definesLimits()) {
+          processed += " limit ?";
+
+          if (selection.getFirstRow() != null) {
+            processed += " offset ?";
+          }
+        }
+
+        return processed;
       }
 
       @Override
       public boolean supportsLimit() {
         return true;
+      }
+
+      @Override
+      public boolean supportsLimitOffset() {
+        return true;
+      }
+
+      @Override
+      public boolean useMaxForLimit() {
+        return false;
       }
 
       @Override
