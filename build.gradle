@@ -1,0 +1,14 @@
+group 'net.alphadev'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'org.hibernate:hibernate-core:5.0.0.CR1'
+}
