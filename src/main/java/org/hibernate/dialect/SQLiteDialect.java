@@ -321,7 +321,7 @@ public class SQLiteDialect extends Dialect {
 
   @Override
   public String getCascadeConstraintsString() {
-    return " cascade";
+    return " ";
   }
 
   /* not case insensitive for unicode characters by default (ICU extension needed)
