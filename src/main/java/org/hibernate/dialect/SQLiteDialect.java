@@ -134,13 +134,13 @@ public class SQLiteDialect extends Dialect {
   */
 
   @Override
-  public String getIdentityColumnString() {
+  public String getIdentityColumnString(int type) {
     // return "integer primary key autoincrement";
     return "integer";
   }
 
   @Override
-  public String getIdentitySelectString() {
+  public String getIdentitySelectString(String table, String column, int type) {
     return "select last_insert_rowid()";
   }
 
