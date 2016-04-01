@@ -20,6 +20,8 @@ import org.hibernate.dialect.function.SQLFunction;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.dialect.function.StandardSQLFunction;
 import org.hibernate.dialect.function.VarArgsSQLFunction;
+import org.hibernate.dialect.identity.IdentityColumnSupport;
+import org.hibernate.dialect.identity.SQLiteDialectIdentityColumnSupport;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
 import org.hibernate.dialect.pagination.LimitHandler;
 import org.hibernate.dialect.pagination.LimitHelper;
@@ -34,32 +36,23 @@ import org.hibernate.internal.util.JdbcExceptionHelper;
 import org.hibernate.mapping.Column;
 import org.hibernate.type.StandardBasicTypes;
 
+/**
+ * An SQL dialect for SQLite 3.
+ */
 public class SQLiteDialect extends Dialect {
   private final UniqueDelegate uniqueDelegate;
 
   public SQLiteDialect() {
     registerColumnType(Types.BIT, "boolean");
-    //registerColumnType(Types.TINYINT, "tinyint");
-    //registerColumnType(Types.SMALLINT, "smallint");
-    //registerColumnType(Types.INTEGER, "integer");
-    //registerColumnType(Types.BIGINT, "bigint");
     //registerColumnType(Types.FLOAT, "float");
-    //registerColumnType(Types.REAL, "real");
     //registerColumnType(Types.DOUBLE, "double");
-    //registerColumnType(Types.NUMERIC, "numeric($p, $s)");
     registerColumnType(Types.DECIMAL, "decimal");
     registerColumnType(Types.CHAR, "char");
-    registerColumnType(Types.VARCHAR, "varchar($l)");
     registerColumnType(Types.LONGVARCHAR, "longvarchar");
-    //registerColumnType(Types.DATE, "date");
-    //registerColumnType(Types.TIME, "time");
     registerColumnType(Types.TIMESTAMP, "datetime");
     registerColumnType(Types.BINARY, "blob");
     registerColumnType(Types.VARBINARY, "blob");
     registerColumnType(Types.LONGVARBINARY, "blob");
-    //registerColumnType(Types.BLOB, "blob");
-    //registerColumnType(Types.CLOB, "clob");
-    //registerColumnType(Types.BOOLEAN, "boolean");
 
     registerFunction( "concat", new VarArgsSQLFunction(StandardBasicTypes.STRING, "", "||", "") );
     registerFunction( "mod", new SQLFunctionTemplate(StandardBasicTypes.INTEGER, "?1 % ?2" ) );
@@ -108,40 +101,10 @@ public class SQLiteDialect extends Dialect {
 
   // IDENTITY support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+  private static final SQLiteDialectIdentityColumnSupport IDENTITY_COLUMN_SUPPORT = new SQLiteDialectIdentityColumnSupport();
   @Override
-  public boolean supportsIdentityColumns() {
-    return true;
-  }
-
-  /*
-  public boolean supportsInsertSelectIdentity() {
-    return true; // As specified in NHibernate dialect
-  }
-  */
-
-  @Override
-  public boolean hasDataTypeInIdentityColumn() {
-    return false; // As specified in NHibernate dialect
-  }
-
-  /*
-  public String appendIdentitySelectToInsert(String insertString) {
-    return new StringBuffer(insertString.length()+30). // As specified in NHibernate dialect
-      append(insertString).
-      append("; ").append(getIdentitySelectString()).
-      toString();
-  }
-  */
-
-  @Override
-  public String getIdentityColumnString(int type) {
-    // return "integer primary key autoincrement";
-    return "integer";
-  }
-
-  @Override
-  public String getIdentitySelectString(String table, String column, int type) {
-    return "select last_insert_rowid()";
+  public IdentityColumnSupport getIdentityColumnSupport() {
+    return IDENTITY_COLUMN_SUPPORT;
   }
 
   // limit/offset support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
