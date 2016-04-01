@@ -1,21 +1,21 @@
 package org.hibernate.dialect.identity;
 
 public class SQLiteDialectIdentityColumnSupport extends IdentityColumnSupportImpl {
-  @Override
-  public boolean supportsIdentityColumns() {
-    return true;
-  }
+	@Override
+	public boolean supportsIdentityColumns() {
+		return true;
+	}
 
   /*
-  public boolean supportsInsertSelectIdentity() {
+	public boolean supportsInsertSelectIdentity() {
     return true; // As specified in NHibernate dialect
   }
   */
 
-  @Override
-  public boolean hasDataTypeInIdentityColumn() {
-    return false; // As specified in NHibernate dialect // FIXME true
-  }
+	@Override
+	public boolean hasDataTypeInIdentityColumn() {
+		return false; // As specified in NHibernate dialect // FIXME true
+	}
 
   /*
   public String appendIdentitySelectToInsert(String insertString) {
@@ -26,14 +26,14 @@ public class SQLiteDialectIdentityColumnSupport extends IdentityColumnSupportImp
   }
   */
 
-  @Override
-  public String getIdentitySelectString(String table, String column, int type) {
-    return "select last_insert_rowid()";
-  }
+	@Override
+	public String getIdentitySelectString(String table, String column, int type) {
+		return "select last_insert_rowid()";
+	}
 
-  @Override
-  public String getIdentityColumnString(int type) {
-    // return "integer primary key autoincrement";
-    return "integer"; // FIXME "autoincrement"
-  }
+	@Override
+	public String getIdentityColumnString(int type) {
+		// return "integer primary key autoincrement";
+		return "integer"; // FIXME "autoincrement"
+	}
 }

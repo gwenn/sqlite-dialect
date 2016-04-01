@@ -14,8 +14,8 @@ trim_trailing_whitespace = true
 
 # Tab indentation
 [*.java]
-indent_style = space
-indent_size = 2
+indent_style = tab
+#indent_size = 2
 
 [pom.xml]
 indent_style = space
