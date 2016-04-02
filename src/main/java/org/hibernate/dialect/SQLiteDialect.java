@@ -256,11 +256,10 @@ public class SQLiteDialect extends Dialect {
 		return false;
 	}
 
-  /*
+	@Override
 	public String getAddColumnString() {
-    return "add column";
-  }
-  */
+		return "add column";
+	}
 
 	@Override
 	public String getDropForeignKeyString() {
