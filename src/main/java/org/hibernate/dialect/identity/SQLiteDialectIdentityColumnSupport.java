@@ -14,11 +14,13 @@ public class SQLiteDialectIdentityColumnSupport extends IdentityColumnSupportImp
 
 	@Override
 	public boolean hasDataTypeInIdentityColumn() {
-		return false; // As specified in NHibernate dialect // FIXME true
+		// As specified in NHibernate dialect
+		// FIXME true
+		return false;
 	}
 
   /*
-  public String appendIdentitySelectToInsert(String insertString) {
+	public String appendIdentitySelectToInsert(String insertString) {
     return new StringBuffer(insertString.length()+30). // As specified in NHibernate dialect
       append(insertString).
       append("; ").append(getIdentitySelectString()).
@@ -34,6 +36,7 @@ public class SQLiteDialectIdentityColumnSupport extends IdentityColumnSupportImp
 	@Override
 	public String getIdentityColumnString(int type) {
 		// return "integer primary key autoincrement";
-		return "integer"; // FIXME "autoincrement"
+		// FIXME "autoincrement"
+		return "integer";
 	}
 }
