@@ -1,6 +1,12 @@
 package org.hibernate.dialect.identity;
 
+import org.hibernate.dialect.Dialect;
 public class SQLiteDialectIdentityColumnSupport extends IdentityColumnSupportImpl {
+	
+	public SQLiteDialectIdentityColumnSupport(Dialect dialect){
+        	super(dialect);
+    	}
+
 	@Override
 	public boolean supportsIdentityColumns() {
 		return true;
