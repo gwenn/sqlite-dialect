@@ -63,30 +63,37 @@ public class SQLiteDialect extends Dialect {
 		registerFunction( "round", new StandardSQLFunction( "round" ) );
 		registerFunction( "substr", new StandardSQLFunction( "substr", StandardBasicTypes.STRING ) );
 		registerFunction( "trim", new AbstractAnsiTrimEmulationFunction() {
+			@Override
 			protected SQLFunction resolveBothSpaceTrimFunction() {
 				return new SQLFunctionTemplate( StandardBasicTypes.STRING, "trim(?1)" );
 			}
 
+			@Override
 			protected SQLFunction resolveBothSpaceTrimFromFunction() {
 				return new SQLFunctionTemplate( StandardBasicTypes.STRING, "trim(?2)" );
 			}
 
+			@Override
 			protected SQLFunction resolveLeadingSpaceTrimFunction() {
 				return new SQLFunctionTemplate( StandardBasicTypes.STRING, "ltrim(?1)" );
 			}
 
+			@Override
 			protected SQLFunction resolveTrailingSpaceTrimFunction() {
 				return new SQLFunctionTemplate( StandardBasicTypes.STRING, "rtrim(?1)" );
 			}
 
+			@Override
 			protected SQLFunction resolveBothTrimFunction() {
 				return new SQLFunctionTemplate( StandardBasicTypes.STRING, "trim(?1, ?2)" );
 			}
 
+			@Override
 			protected SQLFunction resolveLeadingTrimFunction() {
 				return new SQLFunctionTemplate( StandardBasicTypes.STRING, "ltrim(?1, ?2)" );
 			}
 
+			@Override
 			protected SQLFunction resolveTrailingTrimFunction() {
 				return new SQLFunctionTemplate( StandardBasicTypes.STRING, "rtrim(?1, ?2)" );
 			}
@@ -151,13 +158,6 @@ public class SQLiteDialect extends Dialect {
 		return false;
 	}
 
-  /*
-	@Override
-  public boolean dropTemporaryTableAfterUse() {
-    return true; // temporary tables are only dropped when the connection is closed. If the connection is pooled...
-  }
-  */
-
 	// current timestamp support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	@Override
@@ -165,6 +165,7 @@ public class SQLiteDialect extends Dialect {
 		return true;
 	}
 
+	@Override
 	public boolean isCurrentTimestampSelectStringCallable() {
 		return false;
 	}
@@ -211,6 +212,7 @@ public class SQLiteDialect extends Dialect {
 		};
 	}
 
+	@Override
 	public ViolatedConstraintNameExtracter getViolatedConstraintNameExtracter() {
 		return EXTRACTER;
 	}
@@ -300,6 +302,7 @@ public class SQLiteDialect extends Dialect {
 		return true;
 	}
 
+	@Override
 	public boolean doesRepeatableReadCauseReadersToBlockWriters() {
 		return true;
 	}
@@ -309,6 +312,7 @@ public class SQLiteDialect extends Dialect {
 		return false;
 	}
 
+	@Override
 	public int getInExpressionCountLimit() {
 		// Compile/runtime time option: http://sqlite.org/limits.html#max_variable_number
 		return 1000;
