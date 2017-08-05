@@ -103,11 +103,11 @@ public class SQLiteDialect extends Dialect {
 
 	// database type mapping support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	@Override
+	/*@Override
 	public String getCastTypeName(int code) {
-		// FIXME
+		// http://sqlite.org/lang_expr.html#castexpr
 		return super.getCastTypeName( code );
-	}
+	}*/
 
 	// IDENTITY support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
