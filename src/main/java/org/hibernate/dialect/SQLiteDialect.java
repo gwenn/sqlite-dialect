@@ -195,7 +195,7 @@ public class SQLiteDialect extends Dialect {
 		return new SQLExceptionConversionDelegate() {
 			@Override
 			public JDBCException convert(SQLException sqlException, String message, String sql) {
-				final int errorCode = JdbcExceptionHelper.extractErrorCode( sqlException );
+				final int errorCode = JdbcExceptionHelper.extractErrorCode( sqlException ) & 0xFF;
 				if (errorCode == SQLITE_TOOBIG || errorCode == SQLITE_MISMATCH) {
 					return new DataException( message, sqlException, sql );
 				}
@@ -220,7 +220,7 @@ public class SQLiteDialect extends Dialect {
 	private static final ViolatedConstraintNameExtracter EXTRACTER = new TemplatedViolatedConstraintNameExtracter() {
 		@Override
 		protected String doExtractConstraintName(SQLException sqle) throws NumberFormatException {
-			final int errorCode = JdbcExceptionHelper.extractErrorCode( sqle );
+			final int errorCode = JdbcExceptionHelper.extractErrorCode( sqle ) & 0xFF;
 			if (errorCode == SQLITE_CONSTRAINT) {
 				return extractUsingTemplate( "constraint ", " failed", sqle.getMessage() );
 			}
