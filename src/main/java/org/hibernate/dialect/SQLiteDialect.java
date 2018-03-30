@@ -323,7 +323,7 @@ public class SQLiteDialect extends Dialect {
 		return uniqueDelegate;
 	}
 	private static class SQLiteUniqueDelegate extends DefaultUniqueDelegate {
-		public SQLiteUniqueDelegate(Dialect dialect) {
+		private SQLiteUniqueDelegate(Dialect dialect) {
 			super( dialect );
 		}
 		@Override
