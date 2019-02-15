@@ -55,6 +55,8 @@ public class SQLiteDialect extends Dialect {
 		registerColumnType( Types.BINARY, "blob" );
 		registerColumnType( Types.VARBINARY, "blob" );
 		registerColumnType( Types.LONGVARBINARY, "blob" );
+		registerColumnType( Types.NULL, "null" );
+		registerHibernateType( Types.NULL, "null" );
 
 		registerFunction( "concat", new VarArgsSQLFunction( StandardBasicTypes.STRING, "", "||", "" ) );
 		registerFunction( "mod", new SQLFunctionTemplate( StandardBasicTypes.INTEGER, "?1 % ?2" ) );
