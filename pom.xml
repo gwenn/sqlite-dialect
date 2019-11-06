@@ -31,8 +31,8 @@
   </scm>
 
   <ciManagement>
-    <system>travis</system>
-    <url>https://www.travis-ci.org/gwenn/sqlite-dialect</url>
+    <system>github</system>
+    <url>https://github.com/gwenn/sqlite-dialect/actions</url>
   </ciManagement>
 
   <properties>
