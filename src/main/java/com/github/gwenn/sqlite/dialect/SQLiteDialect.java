@@ -7,13 +7,14 @@
  *    May you share freely, never taking more than you give.
  *
  */
-package org.hibernate.dialect;
+package com.github.gwenn.sqlite.dialect;
 
 import java.sql.SQLException;
 import java.sql.Types;
 
 import org.hibernate.JDBCException;
 import org.hibernate.ScrollMode;
+import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.function.AbstractAnsiTrimEmulationFunction;
 import org.hibernate.dialect.function.NoArgSQLFunction;
 import org.hibernate.dialect.function.SQLFunction;
@@ -21,7 +22,7 @@ import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.dialect.function.StandardSQLFunction;
 import org.hibernate.dialect.function.VarArgsSQLFunction;
 import org.hibernate.dialect.identity.IdentityColumnSupport;
-import org.hibernate.dialect.identity.SQLiteDialectIdentityColumnSupport;
+import com.github.gwenn.sqlite.dialect.identity.SQLiteDialectIdentityColumnSupport;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
 import org.hibernate.dialect.pagination.LimitHandler;
 import org.hibernate.dialect.pagination.LimitHelper;
