@@ -7,7 +7,7 @@
  *    May you share freely, never taking more than you give.
  *
  */
-package com.github.gwenn.sqlite.dialect;
+package org.sqlite.hibernate.dialect;
 
 import java.sql.SQLException;
 import java.sql.Types;
@@ -22,7 +22,6 @@ import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.dialect.function.StandardSQLFunction;
 import org.hibernate.dialect.function.VarArgsSQLFunction;
 import org.hibernate.dialect.identity.IdentityColumnSupport;
-import com.github.gwenn.sqlite.dialect.identity.SQLiteDialectIdentityColumnSupport;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
 import org.hibernate.dialect.pagination.LimitHandler;
 import org.hibernate.dialect.pagination.LimitHelper;
@@ -38,6 +37,7 @@ import org.hibernate.exception.spi.ViolatedConstraintNameExtracter;
 import org.hibernate.internal.util.JdbcExceptionHelper;
 import org.hibernate.mapping.Column;
 import org.hibernate.type.StandardBasicTypes;
+import org.sqlite.hibernate.dialect.identity.SQLiteDialectIdentityColumnSupport;
 
 /**
  * An SQL dialect for SQLite 3.

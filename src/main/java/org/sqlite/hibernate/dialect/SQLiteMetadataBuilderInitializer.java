@@ -1,4 +1,4 @@
-package com.github.gwenn.sqlite.dialect;
+package org.sqlite.hibernate.dialect;
 
 import org.hibernate.boot.MetadataBuilder;
 import org.hibernate.boot.registry.StandardServiceRegistry;

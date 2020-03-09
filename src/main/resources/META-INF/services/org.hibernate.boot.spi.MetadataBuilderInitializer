@@ -1,1 +1,1 @@
-com.github.gwenn.sqlite.dialect.SQLiteMetadataBuilderInitializer
+org.sqlite.hibernate.dialect.SQLiteMetadataBuilderInitializer
