@@ -1,4 +1,6 @@
-package org.hibernate.dialect.identity;
+package org.sqlite.hibernate.dialect.identity;
+
+import org.hibernate.dialect.identity.IdentityColumnSupportImpl;
 
 public class SQLiteDialectIdentityColumnSupport extends IdentityColumnSupportImpl {
 	@Override

@@ -1,1 +1,1 @@
-org.hibernate.dialect.SQLiteMetadataBuilderInitializer
+org.sqlite.hibernate.dialect.SQLiteMetadataBuilderInitializer
