@@ -11,6 +11,7 @@ package org.sqlite.hibernate.dialect;
 
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Iterator;
 
 import org.hibernate.JDBCException;
 import org.hibernate.ScrollMode;
@@ -36,6 +37,8 @@ import org.hibernate.exception.spi.TemplatedViolatedConstraintNameExtracter;
 import org.hibernate.exception.spi.ViolatedConstraintNameExtracter;
 import org.hibernate.internal.util.JdbcExceptionHelper;
 import org.hibernate.mapping.Column;
+import org.hibernate.mapping.Table;
+import org.hibernate.mapping.UniqueKey;
 import org.hibernate.type.StandardBasicTypes;
 import org.sqlite.hibernate.dialect.identity.SQLiteDialectIdentityColumnSupport;
 
@@ -330,6 +333,29 @@ public class SQLiteDialect extends Dialect {
 		@Override
 		public String getColumnDefinitionUniquenessFragment(Column column) {
 			return " unique";
+		}
+
+		@Override
+		public String getTableCreationUniqueConstraintsFragment(Table table) {
+			// get all uniqueKeys
+			StringBuilder builder = new StringBuilder();
+			Iterator<UniqueKey> iter = table.getUniqueKeyIterator();
+			while(iter.hasNext()) {
+				builder.append(", unique(");
+				UniqueKey key = iter.next();
+				Iterator<Column> columnIter = key.getColumnIterator();
+				int columnIndex = 0;
+				while(columnIter.hasNext()) {
+					Column column = columnIter.next();
+					if (columnIndex > 0) {
+						builder.append(",");
+					}
+					builder.append(column.getName());
+					columnIndex++;
+				}
+				builder.append(")");
+			}
+			return builder.toString();
 		}
 	}
 
