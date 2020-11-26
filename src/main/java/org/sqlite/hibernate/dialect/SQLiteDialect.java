@@ -15,6 +15,7 @@ import java.util.Iterator;
 
 import org.hibernate.JDBCException;
 import org.hibernate.ScrollMode;
+import org.hibernate.boot.Metadata;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.function.AbstractAnsiTrimEmulationFunction;
 import org.hibernate.dialect.function.NoArgSQLFunction;
@@ -330,11 +331,20 @@ public class SQLiteDialect extends Dialect {
 		private SQLiteUniqueDelegate(Dialect dialect) {
 			super( dialect );
 		}
+
+		/**
+		 * SQLite use table creation sql to define unique constraints.
+		 */
 		@Override
 		public String getColumnDefinitionUniquenessFragment(Column column) {
-			return " unique";
+			return "";
 		}
 
+		/**
+		 * SQLite uses table creation sql to define unique constraints, and do not support alter table sql to add
+		 * constraints.
+		 * Such as "create table person( first_name varchar(255),last_name varchar(255),unique(first_name, last_name) )".
+		 */
 		@Override
 		public String getTableCreationUniqueConstraintsFragment(Table table) {
 			// get all uniqueKeys
@@ -344,18 +354,29 @@ public class SQLiteDialect extends Dialect {
 				builder.append(", unique(");
 				UniqueKey key = iter.next();
 				Iterator<Column> columnIter = key.getColumnIterator();
-				int columnIndex = 0;
 				while(columnIter.hasNext()) {
 					Column column = columnIter.next();
-					if (columnIndex > 0) {
+					builder.append(column.getName());
+					if (columnIter.hasNext()) {
 						builder.append(",");
 					}
-					builder.append(column.getName());
-					columnIndex++;
 				}
 				builder.append(")");
 			}
 			return builder.toString();
+		}
+
+		@Override
+		public String getAlterTableToAddUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
+			return "";
+		}
+
+		/**
+		 * SQLite do not support 'drop constraint'.
+		 */
+		@Override
+		public String getAlterTableToDropUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
+			return "";
 		}
 	}
 
