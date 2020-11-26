@@ -366,6 +366,9 @@ public class SQLiteDialect extends Dialect {
 			return builder.toString();
 		}
 
+		/**
+		 * SQLite do not support 'alter table' to add constraints.
+		 */
 		@Override
 		public String getAlterTableToAddUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
 			return "";
