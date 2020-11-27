@@ -351,17 +351,8 @@ public class SQLiteDialect extends Dialect {
 			StringBuilder builder = new StringBuilder();
 			Iterator<UniqueKey> iter = table.getUniqueKeyIterator();
 			while(iter.hasNext()) {
-				builder.append(", unique(");
 				UniqueKey key = iter.next();
-				Iterator<Column> columnIter = key.getColumnIterator();
-				while(columnIter.hasNext()) {
-					Column column = columnIter.next();
-					builder.append(column.getName());
-					if (columnIter.hasNext()) {
-						builder.append(",");
-					}
-				}
-				builder.append(")");
+				builder.append(", ").append(uniqueConstraintSql(key));
 			}
 			return builder.toString();
 		}
