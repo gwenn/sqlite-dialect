@@ -11,9 +11,11 @@ package org.sqlite.hibernate.dialect;
 
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Iterator;
 
 import org.hibernate.JDBCException;
 import org.hibernate.ScrollMode;
+import org.hibernate.boot.Metadata;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.function.AbstractAnsiTrimEmulationFunction;
 import org.hibernate.dialect.function.NoArgSQLFunction;
@@ -36,6 +38,8 @@ import org.hibernate.exception.spi.TemplatedViolatedConstraintNameExtracter;
 import org.hibernate.exception.spi.ViolatedConstraintNameExtracter;
 import org.hibernate.internal.util.JdbcExceptionHelper;
 import org.hibernate.mapping.Column;
+import org.hibernate.mapping.Table;
+import org.hibernate.mapping.UniqueKey;
 import org.hibernate.type.StandardBasicTypes;
 import org.sqlite.hibernate.dialect.identity.SQLiteDialectIdentityColumnSupport;
 
@@ -327,9 +331,46 @@ public class SQLiteDialect extends Dialect {
 		private SQLiteUniqueDelegate(Dialect dialect) {
 			super( dialect );
 		}
+
+		/**
+		 * SQLite use table creation sql to define unique constraints.
+		 */
 		@Override
 		public String getColumnDefinitionUniquenessFragment(Column column) {
-			return " unique";
+			return "";
+		}
+
+		/**
+		 * SQLite uses table creation sql to define unique constraints, and do not support alter table sql to add
+		 * constraints.
+		 * Such as "create table person( first_name varchar(255),last_name varchar(255),unique(first_name, last_name) )".
+		 */
+		@Override
+		public String getTableCreationUniqueConstraintsFragment(Table table) {
+			// get all uniqueKeys
+			StringBuilder builder = new StringBuilder();
+			Iterator<UniqueKey> iter = table.getUniqueKeyIterator();
+			while(iter.hasNext()) {
+				UniqueKey key = iter.next();
+				builder.append(", ").append(uniqueConstraintSql(key));
+			}
+			return builder.toString();
+		}
+
+		/**
+		 * SQLite do not support 'alter table' to add constraints.
+		 */
+		@Override
+		public String getAlterTableToAddUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
+			return "";
+		}
+
+		/**
+		 * SQLite do not support 'drop constraint'.
+		 */
+		@Override
+		public String getAlterTableToDropUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
+			return "";
 		}
 	}
 
