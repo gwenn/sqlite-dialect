@@ -36,6 +36,10 @@ import org.hibernate.exception.LockAcquisitionException;
 import org.hibernate.exception.spi.SQLExceptionConversionDelegate;
 import org.hibernate.exception.spi.TemplatedViolatedConstraintNameExtracter;
 import org.hibernate.exception.spi.ViolatedConstraintNameExtracter;
+import org.hibernate.hql.spi.id.IdTableSupportStandardImpl;
+import org.hibernate.hql.spi.id.MultiTableBulkIdStrategy;
+import org.hibernate.hql.spi.id.local.AfterUseAction;
+import org.hibernate.hql.spi.id.local.LocalTemporaryTableBulkIdStrategy;
 import org.hibernate.internal.util.JdbcExceptionHelper;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.Table;
@@ -178,6 +182,18 @@ public class SQLiteDialect extends Dialect {
 	@Override
 	public String getCurrentTimestampSelectString() {
 		return "select current_timestamp";
+	}
+
+	// Bulk ID Strategy support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	public MultiTableBulkIdStrategy getDefaultMultiTableBulkIdStrategy() {
+		// SQLite supports temporary tables, and the default "PersistentTableBulkIdStrategy"
+		// used in the Dialect base class doesn't work anymore with Hibernate 5.4.21 and newer.
+		return new LocalTemporaryTableBulkIdStrategy(new IdTableSupportStandardImpl() {
+			public String getCreateIdTableCommand() {
+				return "create temporary table";
+			}
+		}, AfterUseAction.CLEAN, null);
 	}
 
 	// SQLException support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
