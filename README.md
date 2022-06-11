@@ -1,3 +1,5 @@
+**DEPRECATED for Hibernate >= 6** See [HHH-10668](https://hibernate.atlassian.net/browse/HHH-10668) and [hibernate-community-dialects](https://github.com/hibernate/hibernate-orm/blob/main/hibernate-community-dialects/src/main/java/org/hibernate/community/dialect/SQLiteDialect.java)
+
 Hibernate dialect for SQLite inspired from the NHibernate one.
 
 [![Build Status](https://github.com/gwenn/sqlite-dialect/workflows/CI/badge.svg)](https://github.com/gwenn/sqlite-dialect/actions)
