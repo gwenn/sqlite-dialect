@@ -16,6 +16,7 @@ import java.util.Iterator;
 import org.hibernate.JDBCException;
 import org.hibernate.ScrollMode;
 import org.hibernate.boot.Metadata;
+import org.hibernate.boot.model.relational.SqlStringGenerationContext;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.function.AbstractAnsiTrimEmulationFunction;
 import org.hibernate.dialect.function.NoArgSQLFunction;
@@ -356,6 +357,11 @@ public class SQLiteDialect extends Dialect {
 			return "";
 		}
 
+		@Override
+		public String getColumnDefinitionUniquenessFragment(Column column, SqlStringGenerationContext context) {
+			return getColumnDefinitionUniquenessFragment(column);
+		}
+
 		/**
 		 * SQLite uses table creation sql to define unique constraints, and do not support alter table sql to add
 		 * constraints.
@@ -371,6 +377,11 @@ public class SQLiteDialect extends Dialect {
 				builder.append(", ").append(uniqueConstraintSql(key));
 			}
 			return builder.toString();
+		}
+
+		@Override
+		public String getTableCreationUniqueConstraintsFragment(Table table, SqlStringGenerationContext context) {
+			return getTableCreationUniqueConstraintsFragment(table);
 		}
 
 		/**
