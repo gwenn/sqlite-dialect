@@ -5,7 +5,7 @@
   <groupId>com.github.gwenn</groupId>
   <artifactId>sqlite-dialect</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.2</version>
+  <version>0.1.3</version>
   <name>SQLite dialect for Hibernate</name>
   <description>SQLite dialect for Hibernate</description>
   <url>https://github.com/gwenn/sqlite-dialect</url>
