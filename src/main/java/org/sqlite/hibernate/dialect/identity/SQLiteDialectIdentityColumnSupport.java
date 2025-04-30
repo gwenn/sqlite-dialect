@@ -22,12 +22,13 @@ public class SQLiteDialectIdentityColumnSupport extends IdentityColumnSupportImp
 
 	@Override
 	public String appendIdentitySelectToInsert(String insertString) {
+		// FIXME does not work when PK is not an alias of rowid (ie not INTEGER PRIMARY KEY)
 		return insertString + " RETURNING rowid";
 	}
 
 	@Override
 	public String getIdentitySelectString(String table, String column, int type) {
-		return "select last_insert_rowid()";
+		return "SELECT last_insert_rowid()";
 	}
 
 	@Override
