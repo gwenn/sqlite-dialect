@@ -5,7 +5,7 @@
   <groupId>com.github.gwenn</groupId>
   <artifactId>sqlite-dialect</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.4</version>
+  <version>0.2.0</version>
   <name>SQLite dialect for Hibernate</name>
   <description>SQLite dialect for Hibernate</description>
   <url>https://github.com/gwenn/sqlite-dialect</url>
@@ -45,6 +45,19 @@
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
       <version>5.6.15.Final</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.gwenn</groupId>
+      <artifactId>sqlite-jna</artifactId>
+      <version>0.3.0</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

@@ -132,7 +132,7 @@ public class SQLiteDialect extends Dialect {
 		@Override
 		public String processSql(String sql, RowSelection selection) {
 			final boolean hasOffset = LimitHelper.hasFirstRow( selection );
-			return sql + (hasOffset ? " limit ? offset ?" : " limit ?");
+			return sql + (hasOffset ? " LIMIT ? OFFSET ?" : " LIMIT ?");
 		}
 
 		@Override
@@ -182,17 +182,19 @@ public class SQLiteDialect extends Dialect {
 
 	@Override
 	public String getCurrentTimestampSelectString() {
-		return "select current_timestamp";
+		return "SELECT CURRENT_TIMESTAMP";
 	}
 
 	// Bulk ID Strategy support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+	@Override
 	public MultiTableBulkIdStrategy getDefaultMultiTableBulkIdStrategy() {
 		// SQLite supports temporary tables, and the default "PersistentTableBulkIdStrategy"
 		// used in the Dialect base class doesn't work anymore with Hibernate 5.4.21 and newer.
 		return new LocalTemporaryTableBulkIdStrategy(new IdTableSupportStandardImpl() {
+			@Override
 			public String getCreateIdTableCommand() {
-				return "create temporary table";
+				return "CREATE TEMPORARY TABLE";
 			}
 		}, AfterUseAction.CLEAN, null);
 	}
@@ -244,7 +246,7 @@ public class SQLiteDialect extends Dialect {
 		protected String doExtractConstraintName(SQLException sqle) throws NumberFormatException {
 			final int errorCode = JdbcExceptionHelper.extractErrorCode( sqle ) & 0xFF;
 			if (errorCode == SQLITE_CONSTRAINT) {
-				return extractUsingTemplate( "constraint ", " failed", sqle.getMessage() );
+				return extractUsingTemplate( "constraint failed: ", "$", sqle.getMessage() );
 			}
 			return null;
 		}
@@ -282,7 +284,7 @@ public class SQLiteDialect extends Dialect {
 
 	@Override
 	public String getAddColumnString() {
-		return "add column";
+		return "ADD COLUMN";
 	}
 
 	@Override
@@ -350,16 +352,11 @@ public class SQLiteDialect extends Dialect {
 		}
 
 		/**
-		 * SQLite use table creation sql to define unique constraints.
+		 * SQLite uses table creation sql to define unique constraints.
 		 */
 		@Override
-		public String getColumnDefinitionUniquenessFragment(Column column) {
-			return "";
-		}
-
-		@Override
 		public String getColumnDefinitionUniquenessFragment(Column column, SqlStringGenerationContext context) {
-			return getColumnDefinitionUniquenessFragment(column);
+			return "";
 		}
 
 		/**
@@ -368,27 +365,23 @@ public class SQLiteDialect extends Dialect {
 		 * Such as "create table person( first_name varchar(255),last_name varchar(255),unique(first_name, last_name) )".
 		 */
 		@Override
-		public String getTableCreationUniqueConstraintsFragment(Table table) {
+		public String getTableCreationUniqueConstraintsFragment(Table table, SqlStringGenerationContext context) {
 			// get all uniqueKeys
 			StringBuilder builder = new StringBuilder();
 			Iterator<UniqueKey> iter = table.getUniqueKeyIterator();
 			while(iter.hasNext()) {
 				UniqueKey key = iter.next();
-				builder.append(", ").append(uniqueConstraintSql(key));
+				builder.append(", CONSTRAINT ").append(dialect.quote(key.getName())).append(" ").append(uniqueConstraintSql(key));
 			}
 			return builder.toString();
-		}
-
-		@Override
-		public String getTableCreationUniqueConstraintsFragment(Table table, SqlStringGenerationContext context) {
-			return getTableCreationUniqueConstraintsFragment(table);
 		}
 
 		/**
 		 * SQLite do not support 'alter table' to add constraints.
 		 */
 		@Override
-		public String getAlterTableToAddUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
+		public String getAlterTableToAddUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata,
+														 SqlStringGenerationContext context) {
 			return "";
 		}
 
@@ -396,14 +389,15 @@ public class SQLiteDialect extends Dialect {
 		 * SQLite do not support 'drop constraint'.
 		 */
 		@Override
-		public String getAlterTableToDropUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
+		public String getAlterTableToDropUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata,
+														  SqlStringGenerationContext context) {
 			return "";
 		}
 	}
 
 	@Override
 	public String getSelectGUIDString() {
-		return "select hex(randomblob(16))";
+		return "SELECT hex(randomblob(16))";
 	}
 
 	@Override
