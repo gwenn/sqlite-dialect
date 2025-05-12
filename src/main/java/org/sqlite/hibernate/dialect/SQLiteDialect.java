@@ -246,7 +246,7 @@ public class SQLiteDialect extends Dialect {
 		protected String doExtractConstraintName(SQLException sqle) throws NumberFormatException {
 			final int errorCode = JdbcExceptionHelper.extractErrorCode( sqle ) & 0xFF;
 			if (errorCode == SQLITE_CONSTRAINT) {
-				return extractUsingTemplate( "constraint failed: ", "$", sqle.getMessage() );
+				return extractUsingTemplate( "constraint failed: ", "\n", sqle.getMessage() );
 			}
 			return null;
 		}
