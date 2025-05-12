@@ -259,6 +259,13 @@ public class SQLiteDialect extends Dialect {
 		return true;
 	}
 
+	// miscellaneous support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	@Override
+	public String getNoColumnsInsertString() {
+		return "DEFAULT VALUES";
+	}
+
 	// DDL support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	@Override
