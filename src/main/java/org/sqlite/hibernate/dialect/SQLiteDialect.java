@@ -321,7 +321,7 @@ public class SQLiteDialect extends Dialect {
 		return true;
 	}
 
-  /* not case insensitive for unicode characters by default (ICU extension needed)
+  /* not case-insensitive for Unicode characters by default (ICU extension needed)
 	public boolean supportsCaseInsensitiveLike() {
     return true;
   }
